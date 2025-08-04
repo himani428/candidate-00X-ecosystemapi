@@ -1,0 +1,5 @@
+{
+    "EcoWorldBuy": ["LanguageKonnect", "TalentKonnect"],
+  "LanguageKonnect": ["TalentKonnect"],
+  "TheTop36": ["EcoWorldBuy", "LanguageKonnect", "TalentKonnect"]
+}
