@@ -13,6 +13,8 @@ const crmRoutes = require('./routes/crmSync'); // ✅ Add this route
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+const mongoUri = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/ecosystem';
+
 // --- Middleware ---
 app.use(cors());
 app.use(express.json());
@@ -22,15 +24,12 @@ app.use('/admin', express.static(path.join(__dirname, 'public/admin')));
 app.use('/data', express.static(path.join(__dirname, 'data'))); // exposes transactions.json
 
 // --- MongoDB Connection ---
-mongoose.connect('mongodb://127.0.0.1:27017/ecosystem', {
-    useNewUrlParser: true,
-    useUnifiedTopology: true
-})
-.then(() => console.log('✅ Connected to MongoDB'))
-.catch(err => {
+mongoose.connect(mongoUri)
+  .then(() => console.log(`✅ Connected to MongoDB at ${mongoUri}`))
+  .catch(err => {
     console.error('❌ MongoDB connection error:', err.message);
     process.exit(1); // Stop app if DB connection fails
-});
+  });
 
 // --- API Routes ---
 app.use('/api', enrollmentRoutes);
