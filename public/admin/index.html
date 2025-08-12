@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#4f46e5',
+            secondary: '#10b981'
+          }
+        }
+      }
+    };
+  </script>
+</head>
+<body class="bg-gray-100 text-gray-900 font-sans">
+  <div class="max-w-5xl mx-auto p-8">
+    <h1 class="text-4xl font-bold text-primary mb-6">📊 Admin Dashboard</h1>
+
+    <!-- 🔹 Total Enrollments -->
+    <div id="summary" class="mb-8">
+      <h2 class="text-2xl font-semibold mb-2">Total Enrollments</h2>
+      <div class="bg-white shadow rounded p-4 text-3xl font-bold text-secondary">
+        <span id="totalEnrollments">Loading...</span>
+      </div>
+    </div>
+
+    <!-- 🔹 Trigger Test Sync Section -->
+    <div id="testSyncSection" class="mb-10 bg-white p-6 rounded-lg shadow">
+      <h2 class="text-xl font-semibold mb-4 text-primary">🚀 Trigger Test Sync</h2>
+      <div class="flex flex-wrap gap-4 mb-4">
+        <input type="email" id="testEmail" placeholder="Enter test email" class="flex-1 border border-gray-300 p-3 rounded-lg" />
+        <input type="text" id="testSource" placeholder="Enter source (e.g., EcoWorldBuy)" class="flex-1 border border-gray-300 p-3 rounded-lg" />
+        <button onclick="triggerTestSync()" class="bg-green-600 hover:bg-green-700 text-white font-semibold px-6 py-3 rounded-lg">
+          Trigger Test Sync
+        </button>
+      </div>
+    </div>
+
+    <!-- 🔹 Source → Destination Map -->
+    <div id="mapSection" class="mb-10">
+      <h2 class="text-xl font-semibold mb-2 text-primary">🔁 Source → Destination Map</h2>
+      <pre id="mapDisplay" class="bg-white p-5 rounded-lg shadow overflow-auto text-sm"></pre>
+    </div>
+
+    <!-- 🔹 Recent Transactions -->
+    <div id="recent" class="mb-10">
+      <h2 class="text-xl font-semibold mb-2 text-primary">📄 Recent Transactions</h2>
+      <ul id="transactionList" class="bg-white p-4 rounded-lg shadow space-y-2 text-sm"></ul>
+    </div>
+
+    <!-- 🔹 Edit Rule Map -->
+    <div id="mapEditor" class="mb-10">
+      <h2 class="text-xl font-semibold mb-2 text-primary">🛠️ Edit Rule Map</h2>
+      <textarea id="mapInput" class="w-full h-48 p-3 border border-gray-300 rounded-lg font-mono text-sm mb-4"></textarea>
+      <button onclick="updateMap()" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg">
+        Update Map
+      </button>
+    </div>
+
+    <!-- 🔹 API Key Management -->
+    <div id="apiKeyManager" class="bg-white p-6 rounded-lg shadow">
+      <h2 class="text-xl font-semibold mb-3 text-primary">🔐 API Key Management</h2>
+      <div class="flex flex-wrap gap-4 items-center mb-3">
+        <input type="text" id="apiKeyInput" class="flex-1 border p-3 rounded-lg" placeholder="Enter new API key">
+        <button onclick="updateApiKey()" class="bg-purple-600 hover:bg-purple-700 text-white px-5 py-2 rounded-lg">
+          Update API Key
+        </button>
+      </div>
+      <p class="text-sm text-gray-600">Current API Key: <span id="currentApiKey" class="font-mono text-blue-700">TOP36_XYZ123</span></p>
+    </div>
+  </div>
+
+  <!-- 🔹 JavaScript Logic -->
+  <script>
+    async function fetchMap() {
+      const res = await fetch('/api/enrollment-map', {
+        headers: { 'x-api-key': 'TOP36_XYZ123' }
+      });
+      const data = await res.json();
+      document.getElementById('mapDisplay').textContent = JSON.stringify(data, null, 2);
+      document.getElementById('mapInput').value = JSON.stringify(data, null, 2);
+    }
+
+    async function fetchTransactions() {
+      try {
+        const res = await fetch('/data/transactions.json');
+        const logs = await res.json();
+        document.getElementById('totalEnrollments').textContent = logs.length;
+
+        const recent = logs.slice(-5).reverse();
+        const list = document.getElementById('transactionList');
+        list.innerHTML = "";
+        recent.forEach(tx => {
+          const li = document.createElement('li');
+          li.className = "border-b pb-2";
+          li.textContent = `${tx.timestamp} → ${tx.email} via ${tx.source}`;
+          list.appendChild(li);
+        });
+      } catch (err) {
+        console.error("Failed to fetch transactions:", err);
+        document.getElementById('totalEnrollments').textContent = 'Error';
+      }
+    }
+
+    async function updateMap() {
+      try {
+        const newMap = JSON.parse(document.getElementById('mapInput').value);
+        await fetch('/api/enrollment-map', {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-api-key': 'TOP36_XYZ123'
+          },
+          body: JSON.stringify(newMap)
+        });
+        alert('✅ Map updated successfully!');
+        fetchMap();
+      } catch (err) {
+        alert('❌ Invalid JSON format in map');
+      }
+    }
+
+    async function triggerTestSync() {
+      const email = document.getElementById("testEmail").value.trim();
+      const source = document.getElementById("testSource").value.trim();
+      const timestamp = new Date().toISOString();
+
+      if (!email || !source) {
+        alert("❗ Please enter both email and source.");
+        return;
+      }
+
+      try {
+        const res = await fetch("/api/ecosystem-enroll", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "x-api-key": "TOP36_XYZ123" },
+          body: JSON.stringify({ email, source, timestamp })
+        });
+
+        const data = await res.json();
+        if (data.error) {
+          alert(`❌ Error: ${data.error}\nDetails: ${data.details?.join(", ")}`);
+        } else {
+          alert(`✅ Success! Synced to: ${data.destinations.join(", ")}`);
+        }
+      } catch (err) {
+        alert("❌ An error occurred during test sync.");
+        console.error(err);
+      }
+    }
+
+    function updateApiKey() {
+      const newKey = document.getElementById("apiKeyInput").value.trim();
+      if (!newKey) return alert("❗ Please enter a valid API key.");
+      document.getElementById("currentApiKey").textContent = newKey;
+      alert("✅ API key updated (in UI only).");
+    }
+
+    fetchMap();
+    fetchTransactions();
+  </script>
+</body>
+</html>

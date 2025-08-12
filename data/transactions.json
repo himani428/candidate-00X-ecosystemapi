@@ -1,0 +1,83 @@
+[
+  {
+    "email": "test@example.com",
+    "source": "EcoWorldBuy",
+    "destinations": [
+      "PartnerA",
+      "PartnerB"
+    ],
+    "timestamp": "2025-08-07T10:00:00Z"
+  },
+  {
+    "email": "test@example.com",
+    "source": "EcoWorldBuy",
+    "destinations": [
+      "PartnerA",
+      "PartnerB"
+    ],
+    "timestamp": "2025-08-07T10:00:00Z"
+  },
+  {
+    "email": "test@example.com",
+    "source": "EcoWorldBuy",
+    "destinations": [
+      "PartnerA",
+      "PartnerB"
+    ],
+    "timestamp": "2025-08-07T10:00:00Z"
+  },
+  {
+    "email": "test@example.com",
+    "source": "EcoWorldBuy",
+    "destinations": [
+      "PartnerA",
+      "PartnerB"
+    ],
+    "timestamp": "2025-08-07T10:00:00Z"
+  },
+  {
+    "email": "test@example.com",
+    "source": "EcoWorldBuy",
+    "destinations": [
+      "PartnerA",
+      "PartnerB"
+    ],
+    "timestamp": "2025-08-07T10:00:00Z"
+  },
+  {
+    "email": "test@example.com",
+    "source": "EcoWorldBuy",
+    "destinations": [
+      "PartnerA",
+      "PartnerB"
+    ],
+    "timestamp": "2025-08-07T10:00:00Z"
+  },
+  {
+    "email": "you@example.com",
+    "source": "EcoWorldBuy",
+    "destinations": [
+      "LanguageKonnect",
+      "TalentKonnect"
+    ],
+    "timestamp": "2025-08-12T09:00:30.723Z"
+  },
+  {
+    "email": "you@example.com",
+    "source": "EcoWorldBuy",
+    "destinations": [
+      "LanguageKonnect",
+      "TalentKonnect"
+    ],
+    "timestamp": "2025-08-12T09:00:30.787Z"
+  },
+  {
+    "email": "me@example.com",
+    "source": "EcoWorldBuy",
+    "destinations": [
+      "LanguageKonnect",
+      "TalentKonnect"
+    ],
+    "timestamp": "2025-08-12T09:03:01.572Z"
+  }
+]

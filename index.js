@@ -1,47 +1,64 @@
 require('dotenv').config();
-
 const express = require('express');
 const cors = require('cors');
+const path = require('path');
+const mongoose = require('mongoose');
+
+// Route imports
 const enrollmentRoutes = require('./routes/enrollmentRoutes');
 const mapRoutes = require('./routes/mapRoutes');
+const crmRoutes = require('./routes/crmSync'); // ✅ Add this route
 
 // Initialize the Express app
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 // --- Middleware ---
-// Enable Cross-Origin Resource Sharing for all routes
 app.use(cors());
-// Parse incoming JSON requests
 app.use(express.json());
+
+// ✅ Serve static admin UI and logs
+app.use('/admin', express.static(path.join(__dirname, 'public/admin')));
+app.use('/data', express.static(path.join(__dirname, 'data'))); // exposes transactions.json
+
+// --- MongoDB Connection ---
+mongoose.connect('mongodb://127.0.0.1:27017/ecosystem', {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+})
+.then(() => console.log('✅ Connected to MongoDB'))
+.catch(err => {
+    console.error('❌ MongoDB connection error:', err.message);
+    process.exit(1); // Stop app if DB connection fails
+});
 
 // --- API Routes ---
 app.use('/api', enrollmentRoutes);
 app.use('/api', mapRoutes);
+app.use('/api', crmRoutes); // ✅ Register CRM sync endpoint
 
 // --- Root Endpoint ---
-// A simple welcome message for the root URL to confirm the server is running
 app.get('/', (req, res) => {
     res.status(200).json({ 
         message: 'Welcome to the Ecosystem API Layer. See README.md for usage.' 
     });
 });
 
-// --- 404 Not Found Handler ---
-// Catch-all for any request that doesn't match a defined route
+// --- 404 Handler ---
 app.use((req, res, next) => {
     res.status(404).json({ error: 'Endpoint not found' });
 });
 
 // --- Global Error Handler ---
-// Catch-all for any errors that occur during request processing
 app.use((err, req, res, next) => {
+    if (err instanceof SyntaxError && err.status === 400 && 'body' in err) {
+        return res.status(400).json({ error: 'Malformed JSON' });
+    }
     console.error(err.stack);
     res.status(500).json({ error: 'An unexpected internal server error occurred.' });
 });
 
-// Start the server
+// --- Start Server ---
 app.listen(PORT, () => {
-    console.log(`Server is running on http://localhost:${PORT}`);
+    console.log(`🚀 Server is running on http://localhost:${PORT}`);
 });
-
